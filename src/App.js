@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Homepage from './pages/Homepage'
-import ReciperDetails from "./pages/RecipeDetails";
+import RecipeDetails from "./pages/RecipeDetails";
 import Navbar from "./components/Navbar";
 import Error404 from "./pages/Error404";
 import FavoriteProvider from "./context/FavoriteContext";
@@ -15,7 +15,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path = "/" element={<Homepage />} />
-          <Route path = "/recipe-detail" element={<ReciperDetails />} />
+          <Route path = "/recipe/:id" element={<RecipeDetails />} />
           <Route path = "/favorites" element={<Favorites />} />
           <Route path="*" element={<Error404 />} />
         </Routes>

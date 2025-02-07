@@ -7,7 +7,7 @@ const Navbar = () => {
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
         <Link className="navbar-brand" to="/">
-          Recipe Finder
+          RecipeLabs
         </Link>
         <button
           className="navbar-toggler"

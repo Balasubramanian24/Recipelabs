@@ -1,52 +1,53 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import SearchBar from "../components/SearchBar";
-import RecipeCard from "../components/RecipeCard"
-
-const API_URL = "https://api.edamam.com/search?q=";
+import RecipeCard from "../components/RecipeCard";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchRecipes } from "../redux/recipeSlice";
+import FilterBar from "../components/FilterBar";
+import debounce from "lodash.debounce";
 
 const Homepage = () => {
-  const [recipes, setRecipes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+
+  // Get recipes, loading, and error state from Redux
+  const { recipes, loading, error } = useSelector((state) => state.recipes);
+
   const [query, setQuery] = useState("");
-  const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({ mealType: "All Meals", diet: "All Diets" });
 
+  // Fetch default recipes when the page loads
   useEffect(() => {
-    fetchRecipes(query); 
-  }, [query]); 
+    dispatch(fetchRecipes({ query: "chicken", filters }));
+  }, [dispatch]);
 
-  const fetchRecipes = async (searchQuery) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(
-        `${API_URL}${searchQuery}&app_id=a5de3521&app_key=28f8a20bd893e2740e68d4bbb349b977&from=0&to=5`
-      );
+  // Debounce API call to optimize search
+  const debouncedFetchRecipes = useCallback(
+    debounce((searchQuery, activeFilters) => {
+      dispatch(fetchRecipes({ query: searchQuery, filters: activeFilters }));
+    }, 800), 
+    [dispatch]
+  );
 
-      if(!response.ok) {
-        throw new Error("Failed to fetch Recipes. Try again after some time");
-      }
-
-      const data = await response.json();
-
-      if(data.hits.length === 0) {
-        throw new Error ("No Recipes found, Try a different Recipe search !");
-      }
-
-      setRecipes(data.hits || []); 
-    } catch (error) {
-      setError(error.message)
-      setRecipes([]);
-    } finally {
-      setLoading(false);
+  // Handle search input changes
+  const handleSearch = () => {
+    if (query.trim() !== "") {
+      dispatch(fetchRecipes({ query, filters }));
     }
   };
 
+  // Fetch recipes when filters change
+  useEffect(() => {
+    if (query.trim() !== "") {
+      debouncedFetchRecipes(query, filters);
+    }
+  }, [filters, query, debouncedFetchRecipes]);
 
   return (
     <div className="container-fluid p-5">
-      <h1 className="text-center text-dark">Find Delicious Recipes!</h1>
-      <SearchBar query={query} setQuery={setQuery} />
+      <h1 className="heading">Find Delicious Recipes!</h1>
+      <SearchBar query={query} setQuery={setQuery} onSearch={handleSearch} />
+      <FilterBar filters={filters} setFilters={setFilters} />
 
       {loading && <p className="text-center text-muted">Loading recipes...</p>}
       {error && <p className="text-center text-danger">{error}</p>}

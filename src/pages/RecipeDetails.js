@@ -1,10 +1,11 @@
 import React from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, useParams, Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const RecipeDetails = () => {
   const location = useLocation();
-  const recipe = location.state?.recipe;
+  const { id } = useParams(); // Get the ID from the URL
+  const recipe = location.state?.recipe; // Fetch recipe details from state
 
   if (!recipe) {
     return <p className="text-center text-danger">Recipe details not found.</p>;
